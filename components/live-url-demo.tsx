@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { VulnerabilitySimulator } from './vulnerability-simulator';
-import { AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { VisualVulnerabilitySimulator } from './visual-vulnerability-simulator';
+import { AlertCircle, ArrowRight } from 'lucide-react';
 
 interface Finding {
   id: string;
@@ -18,100 +18,33 @@ interface LiveUrlDemoProps {
   onAnalyze?: (url: string) => void;
 }
 
-interface SimulationData {
-  vulnerabilityId: string;
-  vulnerabilityType: string;
-  demonstration: {
-    title: string;
-    scenario: string;
-    steps: Array<{
-      stepNumber: number;
-      action: string;
-      payload?: string;
-      result: string;
-      impact: string;
-    }>;
-  };
-  attackPlayground: {
-    formFields: Array<{
-      name: string;
-      type: string;
-      placeholder: string;
-      vulnerable: boolean;
-    }>;
-    testPayloads: Array<{
-      name: string;
-      payload: string;
-      description: string;
-    }>;
-  };
-  visualization: {
-    before: string;
-    after: string;
-    attackSurface: string;
-  };
-}
-
 export function LiveUrlDemo({ url, findings = [], onAnalyze }: LiveUrlDemoProps) {
   const [inputUrl, setInputUrl] = useState(url || '');
-  const [selectedFinding, setSelectedFinding] = useState<string | null>(null);
-  const [simulation, setSimulation] = useState<SimulationData | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [selectedFinding, setSelectedFinding] = useState<Finding | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLoadSimulation = async (findingId: string) => {
+  const handleSelectFinding = (finding: Finding) => {
     if (!inputUrl) {
       setError('Please enter a URL first');
       return;
     }
-
-    setLoading(true);
     setError(null);
-    setSelectedFinding(findingId);
-
-    try {
-      const response = await fetch('/api/simulate-attack', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vulnerabilityId: findingId,
-          url: inputUrl,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to load simulation');
-      }
-
-      const data = await response.json();
-      setSimulation(data.simulation);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load simulation');
-      setSelectedFinding(null);
-    } finally {
-      setLoading(false);
-    }
+    setSelectedFinding(finding);
   };
 
-  if (simulation) {
+  if (selectedFinding && inputUrl) {
     return (
       <div className="space-y-6">
         <button
-          onClick={() => {
-            setSimulation(null);
-            setSelectedFinding(null);
-          }}
+          onClick={() => setSelectedFinding(null)}
           className="text-primary hover:text-accent transition-colors flex items-center gap-2"
         >
           ← Back to Findings
         </button>
 
-        <VulnerabilitySimulator
-          vulnerabilityType={simulation.vulnerabilityType}
-          scenario={simulation.demonstration.scenario}
-          steps={simulation.demonstration.steps}
-          attackPlayground={simulation.attackPlayground}
-          visualization={simulation.visualization}
+        <VisualVulnerabilitySimulator
+          findingId={selectedFinding.id}
+          vulnerability={selectedFinding.title}
           url={inputUrl}
         />
       </div>
@@ -172,13 +105,8 @@ export function LiveUrlDemo({ url, findings = [], onAnalyze }: LiveUrlDemoProps)
             {findings.map((finding) => (
               <button
                 key={finding.id}
-                onClick={() => handleLoadSimulation(finding.id)}
-                disabled={loading && selectedFinding === finding.id}
-                className={`w-full text-left p-4 rounded-lg border transition-all ${
-                  selectedFinding === finding.id && loading
-                    ? 'bg-primary/20 border-primary'
-                    : 'bg-background/50 border-border hover:border-primary hover:bg-background/80'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                onClick={() => handleSelectFinding(finding)}
+                className="w-full text-left p-4 rounded-lg border transition-all bg-background/50 border-border hover:border-primary hover:bg-background/80"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex-1">
@@ -197,11 +125,7 @@ export function LiveUrlDemo({ url, findings = [], onAnalyze }: LiveUrlDemoProps)
                     }`}>
                       {finding.severity}
                     </span>
-                    {selectedFinding === finding.id && loading ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    ) : (
-                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                    )}
+                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
                   </div>
                 </div>
               </button>

@@ -14,7 +14,6 @@ import { CompareSites } from '@/components/compare-sites';
 import { CompareResults } from '@/components/compare-results';
 import { InteractiveDemo } from '@/components/interactive-demo';
 import { LiveUrlDemo } from '@/components/live-url-demo';
-import { CursorLaptopBg } from '@/components/cursor-laptop-bg';
 import { quizQuestions } from '@/lib/quiz-questions';
 
 export default function Home() {
@@ -138,8 +137,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <CursorLaptopBg />
+    <div className="min-h-screen bg-background">
       <Header />
       <main className="flex flex-col items-center px-4 py-8">
         {/* Tabs Navigation */}

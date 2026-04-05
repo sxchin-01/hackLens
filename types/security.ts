@@ -60,6 +60,10 @@ export interface QuizQuestion {
 
 export interface SecurityFinding {
   id: string;
+  type?: 'xss' | 'sqli' | 'misconfiguration';
+  confidence?: 'low' | 'medium';
+  description?: string;
+  recommendation?: string;
   title: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
   category: 'hacking' | 'performance' | 'compliance' | 'seo' | 'accessibility' | 'general';

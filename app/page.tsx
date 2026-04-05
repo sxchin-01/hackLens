@@ -14,6 +14,7 @@ import { CompareSites } from '@/components/compare-sites';
 import { CompareResults } from '@/components/compare-results';
 import { InteractiveDemo } from '@/components/interactive-demo';
 import { LiveUrlDemo } from '@/components/live-url-demo';
+import SimulateAttack from '@/components/ai-simulation/simulate-attack';
 import { quizQuestions } from '@/lib/quiz-questions';
 
 export default function Home() {
@@ -195,6 +196,13 @@ export default function Home() {
           {activeTab === 'interactive' && (
             <div className="flex w-full flex-col">
               <InteractiveDemo />
+            </div>
+          )}
+
+          {/* Simulate Attack Tab */}
+          {activeTab === 'simulate' && (
+            <div className="flex w-full flex-col">
+              <SimulateAttack />
             </div>
           )}
 
